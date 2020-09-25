@@ -14,6 +14,8 @@ const plumber = require('gulp-plumber');
 // const sourcemaps = require('gulp-sourcemaps');
 // const gulpif = require('gulp-if');
 const browserSync = require('browser-sync').create();
+const babel = require('gulp-babel');
+const webpack = require('webpack-stream');
 
 // Пути директорий
 const dirBuild = 'build';
@@ -46,9 +48,22 @@ const paths = {
   },
 };
 function script() {
-  return gulp.src(paths.app.js).pipe(gulp.dest(paths.build.scripts));
+  return gulp
+    .src(paths.app.js)
+    .pipe(webpack(require('./webpack.config.js')))
+    .pipe(gulp.dest(paths.build.scripts));
 }
-
+function babelJS() {
+  return gulp
+    .src('build/js/bundle.js')
+    .pipe(
+      babel({
+        presets: ['@babel/env'],
+      })
+    )
+    .pipe(rename({ suffix: '.babel' }))
+    .pipe(gulp.dest('build/js/'));
+}
 function styles() {
   return gulp
     .src(paths.app.style)
@@ -133,6 +148,7 @@ exports.watch = watch;
 exports.fonts = fonts;
 exports.clean = clean;
 exports.html = html;
+exports.babelJS = babelJS;
 
 gulp.task(
   'default',
@@ -143,4 +159,7 @@ gulp.task(
   )
 );
 
-gulp.task('build', gulp.series(clean, gulp.parallel(fonts, script, images, styles, html)));
+gulp.task(
+  'build',
+  gulp.series(clean, gulp.parallel(fonts, script, images, styles, html), gulp.series(babelJS))
+);
