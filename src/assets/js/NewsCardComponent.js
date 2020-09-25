@@ -5,21 +5,21 @@ export default class NewsCardComponent {
   }
 
   getTemplate(news) {
-    const { date, title, theme } = news;
+    const { date, title, theme, spotlight } = news;
 
     return `
           <p class="news__date">${date}</p>
           <h3 class="news__title">
               ${title}
           </h3>
-          <p class="news__tags">${theme}</p>
+          <p class="news__tags">${spotlight ? 'В центре внимания' : theme}</p>
           `;
   }
 
   init(item) {
     this.createElement(item);
     this.container.appendChild(this.element);
-    this.setMainNews();
+    this.setMainNews(item);
     this.isTag();
   }
 
@@ -29,9 +29,12 @@ export default class NewsCardComponent {
     this.element.innerHTML = this.getTemplate(item);
   }
 
-  setMainNews() {
-    const mainNews = this.container.firstChild;
-    mainNews.classList.add('news__card--main-news');
+  setMainNews(item) {
+    if (item.spotlight) {
+      console.log('I find spotlight', item);
+      const mainNews = this.container.firstChild;
+      mainNews.classList.add('news__card--main-news');
+    }
   }
 
   removeMainNews() {
